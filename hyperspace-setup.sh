@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# === Safe Mode ===
 set -euo pipefail
 
 # === Colors ===
@@ -14,13 +13,11 @@ echo -e "${CYAN}🚀 Hyperspace Node One-Click Installer 🚀${RESET}"
 # === Prompt for Private Key ===
 read -rp "$(echo -e "${YELLOW}👉 Please paste your Hyperspace PRIVATE KEY: ${RESET}")" PRIVATE_KEY
 
-# === Validate input ===
 if [[ -z "$PRIVATE_KEY" ]]; then
   echo -e "${YELLOW}❌ No Private Key entered. Exiting!${RESET}"
   exit 1
 fi
 
-# === Save key ===
 echo "$PRIVATE_KEY" > my.pem
 chmod 600 my.pem
 echo -e "${GREEN}✅ Private key saved to my.pem${RESET}"
@@ -29,16 +26,18 @@ echo -e "${GREEN}✅ Private key saved to my.pem${RESET}"
 if ! command -v aios-cli &>/dev/null; then
   echo -e "${CYAN}🔑 Installing Hyperspace CLI...${RESET}"
   curl -s https://download.hyper.space/api/install | bash
-  # Manually update PATH for this script execution
   export PATH="$HOME/.aios:$PATH"
 fi
 
-# === Verify CLI ===
-if [ -f "$HOME/.aios/aios-cli" ]; then
-  export AIOS="$HOME/.aios/aios-cli"
+if ! command -v aios-cli &>/dev/null; then
+  if [ -f "$HOME/.aios/aios-cli" ]; then
+    export AIOS="$HOME/.aios/aios-cli"
+  else
+    echo -e "${YELLOW}❌ aios-cli installation failed. Exiting.${RESET}"
+    exit 1
+  fi
 else
-  echo -e "${YELLOW}❌ aios-cli installation failed. Exiting.${RESET}"
-  exit 1
+  export AIOS="aios-cli"
 fi
 
 # === Start in screen ===
